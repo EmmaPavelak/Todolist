@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -17,21 +18,31 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import org.w3c.dom.Comment;
 
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Collection;
+import java.util.Date;
 import java.util.Random;
+
 
 public class MainActivity extends AppCompatActivity {
 
     private TextView mTextStatus;
-
-
+    private int nbTaches = 0;
+    Runnable runnable;
+    private Object Query;
     //Context context = getApplicationContext();
 
     @Override
@@ -44,15 +55,15 @@ public class MainActivity extends AppCompatActivity {
 
         // Recupération elements
         TextView mTextStatus= (TextView) findViewById(R.id.list_status);
-
+        TextView textNbTaches = null;
         Button addButton = (Button)  findViewById(R.id.addButton);
         Button clearButton = (Button) findViewById(R.id.clearButton);
         ListView list = (ListView) findViewById(R.id.list);
 
 
         //LECTURE FIREBASE
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("message");
+        FirebaseFirestore database = FirebaseFirestore.getInstance();
+        /*DatabaseReference myRef = database.getReference("message");
 
         ValueEventListener valueEventListener = myRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -73,7 +84,62 @@ public class MainActivity extends AppCompatActivity {
                 // Failed to read value
                 Log.w("message  ", "Failed to read value.", error.toException());
             }
-        });
+        });*/
+
+
+        // Afficher les tâches en fond
+        Handler handler = new Handler();
+
+        runnable = () ->
+                database.collection("todolist-a0217")
+                        //.orderBy("date", Query.Direction.DESCENDING)
+                        .get()
+                        .addOnCompleteListener(task -> {
+                            nbTaches = 0;
+                            if (task.isSuccessful()) {
+                                //progressBar.setVisibility(View.INVISIBLE);
+
+                                // Si aucune tâches n'est présente
+                             /*   if (Objects.requireNonNull(task.getResult()).isEmpty()) {
+                                    textViewNbTaches.setVisibility(View.INVISIBLE);
+                                    textViewAucuneTacheEnCours.setVisibility(View.VISIBLE);
+                                    listView.setVisibility(View.INVISIBLE);
+                                } else {
+                                    textViewNbTaches.setVisibility(View.VISIBLE);
+                                    textViewAucuneTacheEnCours.setVisibility(View.INVISIBLE);
+                                    listView.setVisibility(View.VISIBLE);*/
+
+
+                                // Récupérer les tâches
+                                ArrayList<String> tache = new ArrayList<>();
+                                for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
+                                    tache.add(Objects.requireNonNull(document.get("Description")).toString());
+                                    nbTaches++;
+                                }
+
+
+                                // Afficher les tâches dans la listView
+                                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(list.getContext(), android.R.layout.select_dialog_multichoice, tache);
+                                list.setAdapter(arrayAdapter);
+                           // }
+
+
+                            // Erreur dans la récupération des tâches
+                        }
+                        else {
+                            /*    Snackbar.make(findViewById(R.id.floatingActionButton), (getString(R.string.erreur_recup_taches) + task.getException()), Snackbar.LENGTH_LONG)
+                                        .setAction(R.string.reessayer, v -> handler.postDelayed(runnable, 0))
+                                        .show();
+                                Log.w(TAG, getString(R.string.erreur_recup_taches) + task.getException());*/
+                            }
+        ;
+    });
+        handler.postDelayed(runnable, 0);
+
+
+
+
+
 
 
         //LISTENER
