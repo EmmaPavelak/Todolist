@@ -114,15 +114,15 @@ public class MainActivity extends AppCompatActivity {
 
         //Création d'une boite de dialogue
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle("Ajouter une tache");
-        alert.setMessage("Donne moi des détails sur ta tâche :)");
+        alert.setTitle("Add task");
+        alert.setMessage("Tell me more about your task :)");
 
         // Création des deux inputs
         final EditText name = new EditText (this);
-        name.setHint("Nom");
+        name.setHint("Name");
 
         final EditText text = new EditText(this);
-        text.setHint("Tache");
+        text.setHint("Task");
 
        // DatePicker date = (DatePicker) findViewById(R.id.datep);
 
@@ -141,8 +141,7 @@ public class MainActivity extends AppCompatActivity {
        //DatePicker date = new DatePicker(this);
         //date.setSpinnersShown(true);
        // date.setCalendarViewShown(false);
-
-       //date.setBackgroundColor(Color.RED);
+        
         //Affichage des deux inputs
         Context context = getApplicationContext();
         LinearLayout layout = new LinearLayout(context);
